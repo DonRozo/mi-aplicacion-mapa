@@ -9,7 +9,7 @@ require([
   ) {
 
   // --- CONFIGURACIÓN ---
-  esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFVwsLxwboNn05dD-g-wXCq6hIoNzOz3ux9yzgOZG9INLDTddo6qBTYDZm_n5DjAO6O-1G_S05HccLOEHCU6pY9YNeW8HQh3pRS9hj2QnKQTi4yVNAK8CwQyccB2cx0cxm2sJxWs-NweHOZptAsO6hcjQ1a1NFUdoHTcxK6JSw0V8HJPCiHtbxHMZrjECeLi-s7KfoOt0r4HU5xbxd9YqtR8A6mc7g9NKRiRQkC0NidsKnEIo5QTxcMjsCY8ibjc-A..AT1_RAbPD7p5"; 
+  esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFVwsLxwboNn05dD-g-wXCq6hIoNzOz3ux9yzgOZG9INLDTddo6qBTYDZm_n5DjAOyi-7dwrRWABXsY3JxNU_J4jht6poTGK7pr0kZDCebJwr_HQQXpBhuiVGqHx61qgMm2r_LcgTF9Kx5LW8O_Nh-3Q2uVRUNysgIMcBWm8NhMNO0w6TstBCLyeMVJg9gNwDW-Ve1zPsXkpTSmnBquPTlvBt5B2Hw8A5m8cgP-CH1BB4l06T8wE4yYvvwfurR82Ig..AT1_RAbPD7p5"; 
   const idDeTuMapaWeb = "ed45f96423704bd5ad66736ddddd68b4"; 
   
   // --- CORRECCIÓN 1: Se añade /0 al final de la URL ---
