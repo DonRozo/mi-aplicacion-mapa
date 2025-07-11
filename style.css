@@ -135,3 +135,35 @@ html, body {
 #draw-point-btn:hover {
     background-color: #0056b3;
 }
+/* --- REGLAS PARA DISEÑO RESPONSIVE (MÓVIL) --- */
+
+/* Estas reglas solo se aplicarán si el ancho de la pantalla es de 768px o menos */
+@media (max-width: 768px) {
+  
+  /* Cambiamos la dirección del contenedor principal a vertical */
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* Hacemos que el mapa ocupe el 40% de la altura de la pantalla */
+  .map-container {
+    flex: 40%;
+  }
+
+  /* Hacemos que el formulario ocupe el 60% de la altura y siga teniendo su scroll */
+  .form-container {
+    flex: 60%;
+  }
+
+  /* Ajustamos la posición del botón de dibujo para la vista móvil */
+  #draw-point-btn {
+    top: 15px;
+    left: auto; /* Quitamos la posición izquierda */
+    right: 15px; /* Lo movemos a la derecha */
+  }
+
+  /* Movemos los widgets del mapa para que no estorben */
+  .esri-ui-top-right {
+      top: 55px; /* Bajamos los widgets de la esquina derecha */
+  }
+}
