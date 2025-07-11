@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Actividades</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <div id="viewDiv" class="map-container">
+            <div id="draw-point-btn" class="esri-widget esri-widget--button esri-interactive" title="Crear punto">
+                <span class="esri-icon-edit"></span>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <h2>Registro de Plantación</h2>
+    
+            <form id="registro-form">
+
+                <div class="form-group">
+                    <label for="num_arboles">Número de árboles plantados</label>
+                    <input type="number" id="num_arboles" name="num_arboles" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="foto_evidencia">Foto(s) de evidencia</label>
+                    <input type="file" id="foto_evidencia" name="foto_evidencia" accept="image/*">
+                </div>
+
+                <div class="form-group">
+                    <label for="FechaPlantacion">Fecha en que realizaste la plantación</label>
+                    <input type="date" id="FechaPlantacion" name="FechaPlantacion" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombre_comun">Selecciona el nombre de la especie plantada</label>
+                    <select id="nombre_comun" name="nombre_comun">
+                        <option value="">--Seleccione una especie--</option>
+                        <option value="Guayacán rosado">Guayacán rosado</option>
+                        <option value="Guayacán amarillo">Guayacán amarillo</option>
+                        <option value="Roble andino">Roble andino</option>
+                        <option value="Nogal">Nogal</option>
+                        <option value="Samán">Samán</option>
+                        <option value="Guamo">Guamo</option>
+                        <option value="Cerezo">Cerezo</option>
+                        <option value="Cedro">Cedro</option>
+                        <option value="Ceiba">Ceiba</option>
+                        <option value="Yarumo">Yarumo</option>
+                        <option value="Aliso">Aliso</option>
+                        <option value="Pino patula">Pino patula</option>
+                        <option value="Eucalipto">Eucalipto</option>
+                        <option value="Teca">Teca</option>
+                        <option value="otra_especie">Otra</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre_cientifico">Nombre científico</label>
+                    <input type="text" id="nombre_cientifico" name="nombre_cientifico" readonly>
+                </div>
+
+                <div class="form-group" id="otra_especie_group" style="display: none;">
+                    <label for="otra_especie">Indica cuál otra especie Plantaste</label>
+                    <input type="text" id="otra_especie" name="otra_especie">
+                </div>
+
+                <div class="form-group">
+                    <label for="ubicacion">¿Árbol aislado o parte de proceso de restauración?</label>
+                    <select id="ubicacion" name="ubicacion">
+                        <option value="">--Seleccione--</option>
+                        <option value="ArbolAislado">Árbol aislado</option>
+                        <option value="ProcesoRestauracion">Proceso de restauración</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="proposito">Propósito de la plantación</label>
+                    <select id="proposito" name="proposito">
+                        <option value="">--Seleccione--</option>
+                        <option value="Restauracion">Restauración</option>
+                        <option value="Compensacion">Compensación</option>
+                        <option value="Fomento">Fomento</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo_plantacion">¿Plantación nueva o resiembra?</label>
+                    <select id="tipo_plantacion" name="tipo_plantacion">
+                        <option value="">--Seleccione--</option>
+                        <option value="Nueva">Nueva</option>
+                        <option value="Resiembra">Resiembra</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="persona_mantto">Persona encargada del mantenimiento</label>
+                    <input type="text" id="persona_mantto" name="persona_mantto">
+                </div>
+                
+                <hr style="margin: 30px 0;">
+                <h4>Información del Plantador</h4>
+
+                <div class="form-group">
+                    <label for="nombre_plantador">Nombre completo</label>
+                    <input type="text" id="nombre_plantador" name="nombre_plantador">
+                </div>
+                
+                <div class="form-group">
+                    <label for="celular_plantador">Número de celular (WhatsApp)</label>
+                    <input type="tel" id="celular_plantador" name="celular_plantador">
+                </div>
+
+                <div class="form-group">
+                    <label for="email_plantador">Correo electrónico</label>
+                    <input type="email" id="email_plantador" name="email_plantador">
+                </div>
+
+                <div class="form-group">
+                    <label for="clasificacion_plantador">Clasificación de la persona u organización</label>
+                    <select id="clasificacion_plantador" name="clasificacion_plantador">
+                        <option value="">--Seleccione--</option>
+                        <option value="comunidad_general">Comunidad en general (plantadores de cambio)</option>
+                        <option value="CAR">CAR</option>
+                        <option value="alcaldias">Alcaldías (solo entidades municipales)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" id="submit-btn" class="submit-btn" disabled>Registrar Plantación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+/* Estilos generales para que todo ocupe la pantalla completa */
+html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden; /* Evita que la página principal tenga scroll */
+}
+
+/* Usamos Flexbox para crear el diseño de dos columnas */
+.app-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* La columna del mapa ocupará el 60% del ancho */
+.map-container {
+    flex: 60%;
+    height: 100%;
+    position: relative; /* Necesario para posicionar el botón de dibujo */
+}
+
+/* --- CAMBIO 1: Contenedor del formulario con scroll --- */
+.form-container {
+    flex: 40%;
+    padding: 25px;
+    background-color: #f9f9f9;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+    height: 100%; /* Asegura que ocupe toda la altura */
+    box-sizing: border-box;
+    overflow-y: auto; /* ¡LA MAGIA! Añade scroll vertical si el contenido es muy largo */
+}
+
+/* --- CAMBIO 2: Título llamativo con el color solicitado --- */
+.form-container h2 {
+    text-align: center;
+    color: #1C8578; /* El color principal que pediste */
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0; /* Una línea sutil de separación */
+}
+
+/* Cada "grupo" de etiqueta y campo */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* --- CAMBIO 3: Estilos con la paleta del logo --- */
+
+/* Las etiquetas de texto (ej: "Nombre de la actividad") */
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #004F50; /* Un azul/verde oscuro del logo */
+}
+
+/* Estilo general para los campos de texto, fecha y la lista */
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s; /* Transición suave */
+}
+
+/* Efecto al hacer clic en un campo: se resalta con el color principal */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1C8578;
+    box-shadow: 0 0 5px rgba(28, 133, 120, 0.5);
+}
+
+/* Placeholder para el pad de firma */
+.signature-pad-placeholder {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+}
+
+/* Estilo del botón de envío usando el color principal */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #1C8578;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Efecto al pasar el mouse por encima del botón */
+.submit-btn:hover:not(:disabled) {
+    background-color: #156A5F; /* Un tono más oscuro del color principal */
+}
+
+/* Estilo del botón cuando está deshabilitado */
+.submit-btn:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* --- Estilo del Botón de Dibujo Personalizado (sin cambios) --- */
+#draw-point-btn {
+    position: absolute;
+    top: 130px;
+    left: 15px;
+    background-color: #1C8578;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+#draw-point-btn:hover {
+    background-color: #0056b3;
+}
