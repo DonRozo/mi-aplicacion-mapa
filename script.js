@@ -1,42 +1,59 @@
-// Archivo script.js - actualizado con listado de especies desde ListadoEspecies.xlsx (230 registros)
-// NOTA: Si necesita actualizar el listado, reemplace el mapeo speciesMap más abajo.
+// Archivo script.js — catálogo de especies actualizado exactamente según el listado fuente.
+// El <select> de especies se llena dinámicamente para evitar inconsistencias.
 
 require([
   "esri/config", "esri/WebMap", "esri/views/MapView", "esri/layers/GraphicsLayer",
   "esri/widgets/Sketch", "esri/layers/FeatureLayer", "esri/widgets/Search",
   "esri/widgets/Home", "esri/widgets/BasemapGallery", "esri/widgets/Expand"
-], function(
-    esriConfig, WebMap, MapView, GraphicsLayer, Sketch, FeatureLayer,
-    Search, Home, BasemapGallery, Expand
-  ) {
-  // --- CONFIGURACIÓN ---
-  esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFVwsLxwboNn05dD-g-wXCq6hIoNzOz3ux9yzgOZG9INLDTddo6qBTYDZm_n5DjAOyi-7dwrRWABXsY3JxNU_J4jht6poTGK7pr0kZDCebJwr_HQQXpBhuiVGqHx61qgMm2r_LcgTF9Kx5LW8O_Nh-3Q2uVRUNysgIMcBWm8NhMNO0w6TstBCLyeMVJg9gNwDW-Ve1zPsXkpTSmnBquPTlvBt5B2Hw8A5m8cgP-CH1BB4l06T8wE4yYvvwfurR82Ig..AT1_RAbPD7p5"; 
-  const idDeTuMapaWeb = "ed45f96423704bd5ad66736ddddd68b4"; 
+], function (
+  esriConfig, WebMap, MapView, GraphicsLayer, Sketch, FeatureLayer,
+  Search, Home, BasemapGallery, Expand
+) {
+  // --- CONFIGURACIÓN (ajusta si cambia tu mapa/capa) ---
+  esriConfig.apiKey = "AAPTxy8BH1VEsoebNVZXo8HurFVwsLxwboNn05dD-g-wXCq6hIoNzOz3ux9yzgOZG9INLDTddo6qBTYDZm_n5DjAOyi-7dwrRWABXsY3JxNU_J4jht6poTGK7pr0kZDCebJwr_HQQXpBhuiVGqHx61qgMm2r_LcgTF9Kx5LW8O_Nh-3Q2uVRUNysgIMcBWm8NhMNO0w6TstBCLyeMVJg9gNwDW-Ve1zPsXkpTSmnBquPTlvBt5B2Hw8A5m8cgP-CH1BB4l06T8wE4yYvvwfurR82Ig..AT1_RAbPD7p5";
+  const idDeTuMapaWeb = "ed45f96423704bd5ad66736ddddd68b4";
   const urlDeTuCapa = "https://services7.arcgis.com/lsxbLWF2l19Rmhqj/arcgis/rest/services/service_9374627a2668441ca317d496364bf485_form/FeatureServer/0";
 
+  // --- MAPA / CAPAS ---
   const graphicsLayer = new GraphicsLayer();
   const featureLayer = new FeatureLayer({ url: urlDeTuCapa });
   const map = new WebMap({ portalItem: { id: idDeTuMapaWeb } });
   map.add(graphicsLayer);
-  const view = new MapView({ container: "viewDiv", map: map });
+  const view = new MapView({ container: "viewDiv", map });
 
-  // Widgets
-  const searchWidget = new Search({ view: view });
+  // Widgets básicos
+  const searchWidget = new Search({ view });
   view.ui.add(searchWidget, { position: "top-right", index: 0 });
-  const homeWidget = new Home({ view: view });
+  const homeWidget = new Home({ view });
   view.ui.add(homeWidget, "top-left");
-  const basemapGallery = new BasemapGallery({ view: view });
-  const bgExpand = new Expand({ view: view, content: basemapGallery });
+  const basemapGallery = new BasemapGallery({ view });
+  const bgExpand = new Expand({ view, content: basemapGallery });
   view.ui.add(bgExpand, "top-right");
-  const sketch = new Sketch({ view: view, layer: graphicsLayer, visibleElements: { createTools: { point: true } } });
+
+  // Sketch (creación de punto activada por botón)
+  const sketch = new Sketch({
+    view,
+    layer: graphicsLayer,
+    visibleElements: { createTools: { point: true, polyline: false, polygon: false, rectangle: false, circle: false } }
+  });
 
   // --- FORMULARIO ---
   const drawPointButton = document.getElementById("draw-point-btn");
   const submitButton = document.getElementById("submit-btn");
   const form = document.getElementById("registro-form");
+
+  const nombreComunDropdown = document.getElementById("nombre_comun");
+  const nombreCientificoInput = document.getElementById("nombre_cientifico");
+  const otraEspecieGroup = document.getElementById("otra_especie_group");
+
   let puntoCreado;
 
-  // Mapeo: nombre común -> nombre científico (desde Excel)
+  // Utilidad: escapar texto para HTML (por si acaso)
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
+  }
+
+  // === Catálogo de especies (común -> científico) EXACTO según tu lista ===
   const speciesMap = {
     "Abarco": "Cariniana sp.",
     "Acacia amarilla": "Cassia siamea (Lam.)",
@@ -48,292 +65,281 @@ require([
     "Agraz": "Vaccinium floribundum",
     "Aguacatillo": "Persea sp.",
     "Ají de páramo": "Drimys sp.",
-    "Alcaparro": "Senna multijuga",
-    "Alcaparro amarillo": "Senna spectabilis",
-    "Alcaparro común": "Senna spectabilis (DC.) H.S.Irwin & Barneby",
-    "Alcaparro morado": "Cassia grandis",
-    "Alcaparro negro": "Senna viarum",
-    "Alcaparrón": "Senna alata",
-    "Alcaparroón": "Senna reticulata",
-    "Aliso": "Alnus acuminata",
-    "Almendro": "Terminalia catappa",
-    "Almendro de río": "Andira inermis",
-    "Alnus": "Alnus sp.",
-    "Arrayán": "Myrcianthes leucoxyla",
-    "Arrayán de páramo": "Myrcianthes sp.",
-    "Arrayán negro": "Myrcianthes rhopaloides",
-    "Arrayán rojo": "Myrcianthes sp.",
-    "Arrayán sabanero": "Blepharocalyx salicifolius",
-    "Arrayancillo": "Myrcia sp.",
-    "Balso": "Ochroma pyramidale",
-    "Bálsamo": "Myroxylon balsamum",
-    "Bauhinia": "Bauhinia sp.",
-    "Búcaro": "Erythrina poeppigiana",
-    "Cabo de hacha": "Trichilia sp.",
-    "Café": "Coffea arabica",
-    "Cajeto": "Protium sp.",
-    "Canelo": "Ocotea sp.",
-    "Canelo de páramo": "Drimys granadensis",
-    "Carbonero": "Calliandra pittieri",
-    "Cariseco": "Cordia cylindrostachya",
-    "Carreto": "Aspidosperma polyneuron",
-    "Canelo encarnado": "Miconia sp.",
-    "Caucho": "Ficus elastica",
+    "Alcaparro enano": "Senna multiglandulosa",
+    "Alcaparro grande": "Senna viarum",
+    "Algarrobo": "Hymenaea courbaril",
+    "Algarrobo doncello": "Prosopis juliflora (Sw.) DC.",
+    "Aliso": "Alnus sp.",
+    "Almendro": "Terminalia sp.",
+    "Amarguero": "Critoniopsis sp.",
+    "Amargoso": "Ageratina sp.",
+    "Amarrabollos": "Meriania sp.",
+    "Angelito": "Monochaetum myrtoideum",
+    "Arizá": "Brownea sp.",
+    "Arbol de caparrapí": "Ocotea  cymbarum Kunth.",
+    "Arbol del pan": "Artocarpus sp.",
+    "Arboloco": "Montanoa quadrangularis",
+    "Arrayán blanco": "Myrcianthes leucoxyla",
+    "Arrayán negro": "Myrcyanthes rophaloides",
+    "Azuceno blanco": "Plumeria sp.",
+    "Balú": "Erythrina edulis",
+    "Baluy": "Erythrina edulis",
+    "Bao": "Platymiscium sp.",
+    "Balso": "Ochroma pyramidale (Cav. Ex-Lam) Urb",
+    "Balso blanco": "Heliocarpus sp.",
+    "Bayo": "Vochysia sp.",
+    "Bilibil": "Guarea sp.",
+    "Blanquillo": "Eupatorium sp.",
+    "Botumbo": "Prunus integrifolia",
+    "Brevo": "Ficus carica",
+    "Buchegallino": "Coccoloba obovata",
+    "Cachimbo": "Erythrina fusca Louveiro",
+    "Cachipay": "Bactris gasipaes Kunth.",
+    "Cafeto de monte": "Posoqueria latifolia",
+    "Camargo": "Verbesina arbórea",
+    "Cámbulo": "Erythrina poeppigiana (Walp.) Q.F.Cook",
+    "Campano": "Vallea stipularis",
+    "Cañafistol amarillo": "Cassia moschata",
+    "Caoba": "Swietenia sp.",
+    "Capote": "Machaerium capote",
+    "Caracolí": "Anacardium excelsum Skeel",
+    "Caraqueño": "Erythrina indica",
+    "Carbonero rojo": "Calliandra sp.",
+    "Cariseco": "Billia sp.",
+    "Carrán colorado": "Pouteria sp.",
+    "Carrapo": "Bulnesia carrapo Killip & Dugand",
+    "Carreto": "Aspidosperma polyneuron Müll . Arg",
+    "Casco de vaca": "Bauhinia sp.",
     "Caucho sabanero": "Ficus soatensis",
-    "Cayeno": "Hibiscus rosa-sinensis",
-    "Cerezo": "Prunus capuli",
+    "Caucho tequendama": "Ficus tequendamae",
+    "Cedrillo": "Phyllantus salvifolius Kunth",
+    "Cedro amarillo": "Albizia guachapele",
+    "Cedro caoba": "Swietenia sp.",
+    "Cedro cebollo": "Cedrela montana Moritz ex Turcz.",
+    "Cedro de altura": "Cedrela montana Moritz ex Turcz.",
+    "Cedro nogal": "Juglans neotrópica Diels",
+    "Cedro rosado": "Cedrela odorata",
+    "Ceiba": "Ceiba pentandra (L.) Gaertn.",
+    "Ceiba amarilla": "Trema micrantha (L.) Blume",
+    "Ceiba bonga": "Ceiba pentandra (L.) Gaertn.",
+    "Ceiba de leche": "Trema micrantha (L.) Blume",
+    "Ceiba verde": "Pseudobombax septenatum (Jacq.) Dugand",
+    "Cerezo común": "Prunus serotina",
+    "Cerezo montañero": "Prunus buxifolia",
+    "Ciro": "Baccharis bogotensis",
+    "Ciruelillo": "Ximenia americana",
+    "Clavellino": "Caesalpinia pulchérrima (L.) Sw.",
     "Chachafruto": "Erythrina edulis",
-    "Chambimbe": "Tradescantia sp.",
-    "Chaparro": "Curatella americana",
-    "Chicalá": "Tecoma stans",
-    "Chicalá amarillo": "Tecoma stans var. stans",
-    "Chicalá de río": "Cordia alliodora",
-    "Chicalá rojo": "Spathodea campanulata",
+    "Chagualo": "Clusia multiflora Kunth",
+    "Chambimbe": "Sapindus saponaria",
+    "Chánamo": "Dodonaea sp.",
+    "Chicalá amarillo": "Tecoma stans (L.) Juss. ex Kunth",
+    "Chicalá rosado": "Delostoma integrifolium",
+    "Chilco": "Baccharis latifolia",
     "Chiminango": "Pithecellobium dulce",
-    "Chirlobirlo": "Cestrum peruvianum",
-    "Chocho": "Lupinus bogotensis",
-    "Chusque": "Chusquea sp.",
-    "Ciprés romerón": "Prumnopitys montana",
-    "Ciruelillo": "Hirtella triandra",
-    "Ciruelo": "Prunus domestica",
-    "Clusia": "Clusia sp.",
-    "Coca": "Erythroxylum coca",
-    "Cocuyo": "Clibadium sp.",
-    "Copaiba": "Copaifera officinalis",
-    "Copoazú": "Theobroma grandiflorum",
-    "Cordoncillo": "Piper aduncum",
-    "Corona de Cristo": "Euphorbia milii",
-    "Creciente": "Baccharis macrantha",
-    "Croto": "Codiaeum variegatum",
+    "Chingalé": "Jacaranda copaia (Aubl.) D. Don",
+    "Chirlobirlo": "Tecoma stans",
+    "Chitató": "Muntingia calabura",
+    "Chocho de arbol": "Erythrina rubrinervia Kunth",
+    "Chuque": "Viburnum triphyllum Bentham",
+    "Cocacá": "Achatocarpus nigricans Triana",
+    "Coralito": "Ixora sp.",
+    "Corono": "Xilosma sp",
+    "Cruceto": "Randia aculeata L.",
     "Cucharo": "Myrsine guianensis",
-    "Cucharo negro": "Rapanea guianensis",
-    "Cucharo sabanero": "Myrsine coriacea",
-    "Cucharo verde": "Myrsine andina",
-    "Cucharo rojo": "Myrsine dependens",
-    "Cucho": "Casearia sp.",
-    "Culantrillo": "Pellaea sp.",
-    "Curapiche": "Zanthoxylum fagara",
-    "Curari": "Strychnos sp.",
-    "Curuba": "Passiflora tripartita var. mollissima",
-    "Dulcamara": "Solanum dulcamara",
-    "Encenillo": "Weinmannia pubescens",
-    "Encenillo negro": "Weinmannia tomentosa",
-    "Encenillo sabanero": "Weinmannia sp.",
-    "Encenillo rojo": "Weinmannia rollotii",
-    "Enciso": "Myrsine sp.",
-    "Eucalipto": "Eucalyptus globulus",
-    "Falso pimiento": "Schinus molle",
-    "Feijoa": "Acca sellowiana",
-    "Fique": "Furcraea andina",
-    "Flor amarillo": "Senna spectabilis var. excelsa",
-    "Flor de mayo": "Brownea ariza",
-    "Fucsia": "Fuchsia magellanica",
-    "Garrayo": "Zanthoxylum sp.",
-    "Gaque": "Clusia multiflora",
-    "Gualanday": "Jacaranda mimosifolia",
-    "Guamo": "Inga edulis",
-    "Guamo macheto": "Inga sp.",
-    "Guamo santafereño": "Inga densiflora",
-    "Guamo negro": "Inga spuria",
-    "Guamo rabo de mico": "Inga sp.",
-    "Guamumo": "Virola sebifera",
-    "Guarumo": "Cecropia sp.",
-    "Guayacán amarillo": "Handroanthus chrysotrichus",
-    "Guayacán blanco": "Tabebuia roseo-alba",
-    "Guayacán rosado": "Handroanthus impetiginosus",
-    "Guayacán santafereño": "Handroanthus chrysanthus",
-    "Guayabo": "Psidium guajava",
-    "Guayabo cas": "Psidium friedrichsthalianum",
-    "Guayabo sabanero": "Psidium acutangulum",
-    "Guayaba": "Psidium guajava",
-    "Guayabilla": "Eugenia sp.",
-    "Guayacán de Manizales": "Handroanthus sp.",
-    "Guayacán trebolito": "Handroanthus sp.",
-    "Gurapo": "Palicourea sp.",
-    "Haya": "Juglans neotropica",
-    "Higuerón": "Ficus sp.",
-    "Higuerilla": "Ricinus communis",
-    "Hinojo": "Foeniculum vulgare",
-    "Hojarasquero": "Hyeronima alchorneoides",
-    "Huanoco": "Gunnera magellanica",
-    "Hued-hued": "Tristerix corymbosus",
-    "Iguá": "Sloanea sp.",
-    "Incienso": "Bursera graveolens",
-    "Isigo": "Miconia theaezans",
+    "Cucharo blanco": "Myrsine coriaceae",
+    "Cucubo": "Solanum oblongifolium",
+    "Cují": "Prosopis juliflora (Sw.) DC.",
+    "Cumulá": "Aspidosperma polyneuron Müll . Arg",
+    "Dinde": "Maclura tinctoria (L.) D. Don ex Steud",
+    "Diomate": "Astronium graveolens Jacq.",
+    "Dividivi de tierra fría": "Tara espinosa (Molina) Br. & Rose",
+    "Drago": "Croton sp.",
+    "Duraznillo": "Abatia parviflora Ruiz & Pav.",
+    "Encenillo": "Weinmannia sp.",
+    "Endrino": "Myrcia sp.",
+    "Espadero": "Myrsine coriaceae",
+    "Espino garbanzo": "Duranta sp.",
+    "Falso pimiento": "Schinus molle L.",
+    "Floramarillo": "Tecoma stans",
+    "Gaque": "Clusia multiflora Kunth",
+    "Garrocho": "Viburnum triphyllum Bentham",
+    "Gomo": "Cordia alba L",
+    "Granadillo": "Platymiscium hebestachyum Benth",
+    "Granizo": "Hedyosmum sp.",
+    "Guácimo": "Guazuma ulmifolia Lam.",
+    "Guácimo colorado": "Luehea seemannii Triana & Planch",
+    "Guacharaco": "Cupania sp.",
+    "Guadua": "Guadua spp.",
+    "Gualanday": "Jacaranda caucana Pittier",
+    "Guamo": "Inga sp.",
+    "Guamuche": "Albizia carbonaria (Britton) E.J.M.Koenen",
+    "Guaney": "Erythrina poeppigiana (Walp.) O.F. Cook",
+    "Guayacán amarillo": "Handroanthus chrysanthus",
+    "Guayacán de Manizales": "Lafoencia speciosa",
+    "Guayacán carrapo": "Bulnesia sp.",
+    "Guayacán chaparro": "Albizia pistaciifolia  (Willd.) Barneby & J.W.Grimes.",
+    "Guayacán hobo": "Centrolobium sp.",
+    "Guayacán negro": "Guaiacum officinale",
+    "Guayacán trébol": "Platymiscium sp.",
+    "Gurrubo": "Lycianthes sp.",
+    "Gusanero": "Astronium graveolens Jacq.",
+    "Hayuelo": "Dodonaea sp.",
+    "Higuerón": "Ficus insipida",
+    "Hobo": "Spondias mombin L.",
+    "Iguá": "Albizia guachapele",
+    "Indiodesnudo": "Bursera sp.",
     "Jaboncillo": "Sapindus saponaria",
-    "Jaboncillo negro": "Sapindus sp.",
-    "Jaque": "Cordia alliodora",
-    "Jigua": "Guarea guidonia",
-    "Jigua negro": "Guarea sp.",
-    "Jigua real": "Guarea trichilioides",
-    "Juan Primero": "Sambucus nigra",
-    "Lechero": "Sapium stylare",
-    "Lechero sabanero": "Sapium rigidifolium",
-    "Leucaena": "Leucaena leucocephala",
-    "Liquidámbar": "Liquidambar styraciflua",
-    "Loro": "Cordia sp.",
-    "Macana": "Guadua angustifolia",
-    "Macanillo": "Guadua sp.",
-    "Macanillo de sabana": "Guadua angustifolia var. bicolor",
-    "Maguey": "Agave americana",
-    "Maíz tostao": "Zea mays",
-    "Mamoncillo": "Melicoccus bijugatus",
-    "Manzano": "Malus domestica",
-    "Manteco": "Clusia sp.",
-    "Mantequillo": "Myrsine sp.",
-    "Mantequillo de sabana": "Myrsine coriacea",
-    "Marañón": "Anacardium occidentale",
+    "Jagua": "Genipa americana L.",
+    "Jazmin": "Guettarda rusbyi Standl.",
+    "Jazmin del Cabo": "Pittosporum undulatum Vent.",
+    "Jobo": "Spondias mombin L.",
+    "Juco": "Viburnum triphyllum Bentham",
+    "Laurel": "Ocotea sp.",
+    "Laurel de cera hojiancho": "Morella pubescens",
+    "Laurel de cera hojipequeño": "Morella parvifolia",
+    "Laurel huesito": "Pittosporum undulatum Vent.",
+    "Lechero plomo": "Pseudolmedia sp.",
+    "Limonacho": "Achatocarpus nigricans Triana",
+    "Lombricero": "Alchornea sp",
+    "Lulo de perro": "Solanum oblongifolium",
+    "Macle": "Escallonia sp.",
+    "Mamoncillo": "Meliccocus bijugatus  Jacq.",
+    "Mangle de tierra fría": "Escallonia sp.",
+    "Mano de oso": "Oreopanax sp.",
     "Matarratón": "Gliricidia sepium",
-    "Matarratón rojo": "Erythrina fusca",
-    "Melancólico": "Brugmansia arborea",
-    "Miju": "Casearia sp.",
-    "Moho": "Miconia sp.",
-    "Mogollón": "Visnea mocanera",
-    "Molinillo": "Guatteria sp.",
-    "Moncora": "Mauria heterophylla",
-    "Mora": "Rubus glaucus",
-    "Mortiño": "Vaccinium floribundum",
-    "Mortiño de páramo": "Vaccinium meridionale",
-    "Mostaza de árbol": "Schinus polygamus",
-    "Muco": "Oreopanax floribundus",
-    "Nacedero": "Trichanthera gigantea",
-    "Naranja": "Citrus sinensis",
-    "Naranjuelo": "Citrus aurantium",
-    "Nogal": "Juglans neotropica",
-    "Nogal cafetero": "Cordia alliodora",
-    "Nogal negro": "Juglans nigra",
-    "Nogal ross": "Guarea sp.",
-    "Nogal sabanero": "Juglans neotropica",
-    "Nopal": "Opuntia ficus-indica",
-    "Ocobo": "Tabebuia rosea",
-    "Ocobo blanco": "Tabebuia rosea var. alba",
-    "Orquídea arbórea": "Spathodea campanulata (forma epífita)",
-    "Pacheco": "Tecoma stans",
-    "Palo blanco": "Cedrela montana",
-    "Palo bobo": "Tessaria integrifolia",
-    "Palo cruz": "Brownea ariza",
-    "Palo de agua": "Dracaena fragrans",
-    "Palo manzano": "Quercus humboldtii",
-    "Palo negro": "Trichilia sp.",
-    "Pasto kikuyo": "Pennisetum clandestinum",
-    "Paujil": "Clusia multiflora",
-    "Payandé": "Tecoma stans",
-    "Penca sábila": "Aloe vera",
-    "Peonía": "Paeonia officinalis",
-    "Peumo": "Cryptocarya alba",
-    "Pimentero": "Piper nigrum",
-    "Pino patula": "Pinus patula",
-    "Pino romerón": "Retrophyllum rospigliosii",
-    "Pino sabanero": "Pinus radiata",
-    "Piñón de oreja": "Enterolobium cyclocarpum",
-    "Piramo": "Myrsine sp.",
-    "Plátano": "Musa paradisiaca",
-    "Pomarroso": "Syzygium jambos",
-    "Porotá": "Erythrina sp.",
-    "Pringamoza": "Urera baccifera",
-    "Puchón": "Eugenia sp.",
-    "Quiche": "Myrcianthes sp.",
-    "Quinua": "Chenopodium quinoa",
-    "Quinual": "Polylepis quadrijuga",
-    "Quinual de páramo": "Polylepis sericea",
-    "Quinual sabanero": "Polylepis sp.",
-    "Rabo de mico": "Tradescantia sp.",
-    "Rasquiña": "Vallea stipularis",
-    "Retamo": "Ulex europaeus",
-    "Retamo espinoso": "Ulex europaeus var. europaeus",
-    "Retamo liso": "Teline monspessulana",
-    "Retamo sietecueros": "Tibouchina lepidota",
-    "Retamo sp.": "Teline sp.",
-    "Revolcón": "Croton bogotensis",
-    "Roble": "Quercus humboldtii",
-    "Roble andino": "Quercus humboldtii",
-    "Romerón": "Retrophyllum rospigliosii",
-    "Romerón sabanero": "Retrophyllum rospigliosii",
-    "Rubio": "Vallea stipularis",
-    "Ruibarbo": "Rheum rhabarbarum",
-    "Sauco": "Sambucus nigra",
-    "Sauco negro": "Sambucus nigra",
-    "Sietecueros": "Tibouchina mutabilis",
-    "Sietecueros de monte": "Tibouchina lepidota",
-    "Sietecueros sabanero": "Tibouchina sp.",
-    "Sietecueros rojo": "Tibouchina urvilleana",
-    "Silvadora": "Dendropanax arboreus",
-    "Sinamaya": "Zanthoxylum rigidum",
-    "Sirvo": "Trema micrantha",
-    "Soga": "Mikania sp.",
-    "Sorzal": "Myrsine latifolia",
-    "Tabebuia": "Tabebuia sp.",
-    "Tabaquillo": "Nicotiana glauca",
-    "Tachuelo": "Tecoma stans",
-    "Tarumo": "Cecropia peltata",
-    "Teca": "Tectona grandis",
-    "Tilo": "Tilia platyphyllos",
-    "Toche": "Ochroma pyramidale",
-    "Tomate de árbol": "Solanum betaceum",
-    "Totumo": "Crescentia cujete",
-    "Trébol": "Trifolium repens",
-    "Uche": "Guazuma ulmifolia",
-    "Uchuva": "Physalis peruviana",
-    "Uva camarona": "Macleania rupestris",
-    "Uva de monte": "Cavendishia bracteata",
-    "Uvo": "Citharexylum montanum",
-    "Valeriana": "Valeriana officinalis",
-    "Verbena": "Verbena litoralis",
-    "Vuelta vaca": "Ludwigia peruviana",
+    "Mayo": "Tibouchina lepidota (Bompl.) Baill.",
+    "Mestizo": "Cupania sp.",
+    "Michú": "Sapindus saponaria",
+    "Móncoro": "Cordia gerascanthus",
+    "Mortiño": "Hesperomeles sp.",
+    "Mortiño verdadero": "Hesperomeles sp.",
+    "Muche": "Albizia carbonaria (Britton) E.J.M.Koenen",
+    "Nacedero": "Trichanthera sp.",
+    "Naranjillo": "Quadrellla odoratissima",
+    "Naranjuelo": "Capparis sp.",
+    "Nogal cafetero": "Cordia alliodora (Ruiz & Pav. ) Oken",
+    "Nogal negro": "Juglans neotrópica Diels",
+    "Ocobo blanco": "Tabebuia roseoalba",
+    "Ocobo rosado": "Tabebuia rosea (Bertol.) Bertero ex A. DC",
+    "Ocobo flor morado": "Tabebuia rosea (Bertol.) Bertero ex A. DC",
+    "Ondequera": "Casearia corymbosa Kunth",
+    "Orejero": "Enterolobium cyclocarpum (Jacq.) Griseb",
+    "Pagoda": "Escallonia myrtilloides",
+    "Palma amarga": "Sabal mauritiiformis ",
+    "Palma cola de pescado": "Caryota mitis",
+    "Palma de cera": "Ceroxylon vogelianum (Engel) H. Wendl.",
+    "Palma de cera de Sasaima": "Ceroxylon sasaimae Galeano",
+    "Palma de cuesco": "Attalea butyracea (Mutis ex L.f.) Wess.Boer",
+    "Palma de vino": "Attalea butyracea (Mutis ex L.f.) Wess.Boer",
+    "Palma mararay": "Aiphanes sp.",
+    "Palma mil pesos": "Oenocarpus bataua ",
+    "Palma Real": "Ceroxylon alpinum Bonpl. Ex DC.",
+    "Palma Sabal": "Sabal mauritiiformis ",
+    "Palo de cruz": "Brownea sp.",
+    "Palo mulato": "Ilex kunthiana",
+    "Paloblanco": "Ilex kunthiana",
+    "Pategallina": "Schefflera sp.",
+    "Pavito": "Jacaranda copaia (Aubl.) D. Don",
+    "Payandé bobo": "Pithecellobium dulce",
+    "Pino colombiano": "Podocarpus sp.",
+    "Pino romerón": "Decusocarpus sp.",
+    "Piñon de oreja": "Enterolobium cyclocarpum (Jacq.) Griseb",
+    "Raque": "Vallea stipularis",
+    "Rayo": "Parkia sp.",
+    "Roble": "Quercus sp.",
+    "Roble negro": "Colombobalanus sp.",
+    "Rodamonte": "Escallonia myrtilloides",
+    "Romerón": "Decusocarpus sp.",
+    "Ruque": "Viburnum triphyllum",
+    "Samán": "Albizia samán",
+    "Sangregao": "Croton sp.",
+    "Sangretoro": "Virola sp.",
+    "San juanito": "Vallea estipularis",
+    "Sauce llorón": "Salix sp.",
+    "Sauco": "Sambucus sp.",
+    "Sauz": "Salix sp.",
+    "Sietecueros": "Tibouchina lepidota (Bompl.) Baill.",
+    "Suribio": "Zigya sp.",
+    "Tabaquillo": "Solanum mauritianum",
+    "Tachuelo": "Zanthoxylum sp.",
+    "Tagua": "Giadendron punctatum",
+    "Tamarindo": "Tamarindus indica",
+    "Tambor": "Schizolobium sp.",
+    "Tibar": "Escallonia paniculata sp",
+    "Tinto": "Cestrum sp.",
+    "Totumo": "Crescentia cujete L.",
+    "Tomatillo": "Lycianthes sp.",
+    "Totumo de paramo": "Citharexylum sp.",
+    "Trompeto": "Bocconia sp.",
+    "Tronador": "Hura crepitans",
+    "Trupillo": "Prosopis juliflora (Sw.) DC.",
+    "Tuno": "Miconia sp.",
+    "Uche": "Prunus buxifolia",
+    "Uva camarona": "Cavendishia sp.",
+    "Uva de anís": "Macleania sp.",
+    "Uvito": "Cordia alba L",
+    "Vainillo": "Senna spectabilis",
+    "Velero": "Senna spectabilis",
+    "Velitas": "Abatia parviflora Ruiz & Pav.",
     "Yarumo": "Cecropia sp.",
-    "Yarumo azaroso": "Cecropia peltata",
-    "Yopo": "Anadenanthera peregrina",
-    "Zurrumbo": "Hyeronima macrocarpa"
+    "Yopo": "Anadenanthera sp.",
+    "Zurrumbo": "Trema micrantha (L.) Blume"
   };
 
-  const nombreComunDropdown = document.getElementById("nombre_comun");
-  const nombreCientificoInput = document.getElementById("nombre_cientifico");
-  const otraEspecieGroup = document.getElementById("otra_especie_group");
+  // --- Poblar el <select> desde speciesMap ---
+  (function cargarOpciones() {
+    let html = '<option value="">--Seleccione una especie--</option>';
+    Object.keys(speciesMap).forEach(nombreComun => {
+      html += `<option value="${escapeHtml(nombreComun)}">${escapeHtml(nombreComun)}</option>`;
+    });
+    html += `<option value="otra_especie">Otra</option>`;
+    nombreComunDropdown.innerHTML = html;
+  })();
 
-  // Actualiza el nombre científico cuando cambia la especie
-  nombreComunDropdown.addEventListener('change', function(event) {
-    const selectedValue = event.target.value;
-    const cientifico = speciesMap[selectedValue] || "";
-    nombreCientificoInput.value = cientifico;
+  // Sincroniza nombre científico y muestra campo "Otra"
+  nombreComunDropdown.addEventListener("change", (e) => {
+    const val = e.target.value;
+    const cient = speciesMap[val] || "";
+    nombreCientificoInput.value = cient;
 
-    // Si es 'Otra', habilitar campo para capturar 'otra_especie' y permitir escribir el nombre científico
-    if (selectedValue === 'otra_especie') {
-      otraEspecieGroup.style.display = 'block';
+    if (val === "otra_especie") {
+      otraEspecieGroup.style.display = "block";
       nombreCientificoInput.readOnly = false;
       nombreCientificoInput.placeholder = "Escribe el nombre científico (opcional)";
     } else {
-      otraEspecieGroup.style.display = 'none';
+      otraEspecieGroup.style.display = "none";
       nombreCientificoInput.readOnly = true;
       nombreCientificoInput.placeholder = "";
     }
   });
 
   // Botón para dibujar punto
-  drawPointButton.addEventListener("click", function() { sketch.create("point"); });
+  drawPointButton.addEventListener("click", () => sketch.create("point"));
 
-  // Habilita enviar solo cuando hay un punto
-  sketch.on("create", function(event) {
+  // Habilitar envío cuando hay punto
+  sketch.on("create", (event) => {
     if (event.state === "complete") {
-      if (puntoCreado) { graphicsLayer.remove(puntoCreado); }
+      if (puntoCreado) graphicsLayer.remove(puntoCreado);
       puntoCreado = event.graphic;
       submitButton.disabled = false;
     }
   });
 
   // Envío del formulario
-  form.addEventListener("submit", function(event) {
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (!puntoCreado) {
       alert("Por favor, crea un punto en el mapa primero.");
       return;
     }
 
-    const atributos = {
+    const attrs = {
       num_arboles: form.elements["num_arboles"].value,
       FechaPlantacion: form.elements["FechaPlantacion"].value,
       nombre_cientifico: form.elements["nombre_cientifico"].value,
       nombre_comun: form.elements["nombre_comun"].value,
-      otra_especie: form.elements["otra_especie"].value,
+      otra_especie: form.elements["otra_especie"] ? form.elements["otra_especie"].value : "",
       ubicacion: form.elements["ubicacion"].value,
       proposito: form.elements["proposito"].value,
       tipo_plantacion: form.elements["tipo_plantacion"].value,
@@ -343,56 +349,54 @@ require([
       email_plantador: form.elements["email_plantador"].value,
       clasificacion_plantador: form.elements["clasificacion_plantador"].value
     };
-    
+
     const nuevoRegistro = {
       geometry: puntoCreado.geometry,
-      attributes: atributos
+      attributes: attrs
     };
 
     submitButton.disabled = true;
     submitButton.textContent = "Guardando datos...";
 
-    featureLayer.applyEdits({
-      addFeatures: [nuevoRegistro]
-    }).then(function(resultadoEdicion) {
-      if (resultadoEdicion.addFeatureResults.length > 0 && !resultadoEdicion.addFeatureResults[0].error) {
-        const objectId = resultadoEdicion.addFeatureResults[0].objectId;
-        const archivo = form.elements["foto_evidencia"].files[0];
-        if (archivo) {
-          submitButton.textContent = "Subiendo adjunto...";
-          const formData = new FormData();
-          formData.append("attachment", archivo);
-          formData.append("f", "json");
-          formData.append("token", esriConfig.apiKey);
-          const urlAdjunto = `${urlDeTuCapa}/${objectId}/addAttachment`;
-          return fetch(urlAdjunto, { method: 'POST', body: formData });
-        } else {
-          return null;
+    featureLayer.applyEdits({ addFeatures: [nuevoRegistro] })
+      .then((res) => {
+        const r = res.addFeatureResults?.[0];
+        if (!r || r.error) {
+          throw new Error(r?.error?.message || "No se pudo guardar el registro.");
         }
-      } else {
-        throw new Error(resultadoEdicion.addFeatureResults[0].error?.message || "No se pudo guardar el registro.");
-      }
-    }).then(function(resultadoAdjunto) {
-      if (resultadoAdjunto && resultadoAdjunto.ok) { return resultadoAdjunto.json(); }
-      return null;
-    }).then(function(jsonFinal) {
-      if (jsonFinal && jsonFinal.error) {
-        alert(`Registro guardado, pero hubo un error con el adjunto: ${jsonFinal.error.message}`);
-      } else if (jsonFinal && jsonFinal.addAttachmentResult && jsonFinal.addAttachmentResult.success) {
-        alert("¡Registro y adjunto guardados con éxito!");
-      } else {
-        alert("¡Registro guardado con éxito! (sin adjunto)");
-      }
-      form.reset();
-      graphicsLayer.remove(puntoCreado);
-      puntoCreado = null;
-      submitButton.disabled = true;
-      submitButton.textContent = "Registrar Plantación";
-    }).catch(function(error) {
-      alert("Hubo un error en el proceso. Revisa la consola para más detalles.");
-      console.error("Error en el proceso de guardado:", error);
-      submitButton.disabled = false;
-      submitButton.textContent = "Registrar Plantación";
-    });
+        const objectId = r.objectId;
+        const archivo = form.elements["foto_evidencia"]?.files?.[0];
+        if (!archivo) return null;
+
+        submitButton.textContent = "Subiendo adjunto...";
+        const formData = new FormData();
+        formData.append("attachment", archivo);
+        formData.append("f", "json");
+        // Si tu capa permite edición anónima, no necesitas token aquí.
+        const urlAdjunto = `${urlDeTuCapa}/${objectId}/addAttachment`;
+        return fetch(urlAdjunto, { method: "POST", body: formData });
+      })
+      .then((resp) => (resp && resp.ok ? resp.json() : null))
+      .then((jsonFinal) => {
+        if (jsonFinal && jsonFinal.error) {
+          alert(`Registro guardado, pero hubo un error con el adjunto: ${jsonFinal.error.message}`);
+        } else if (jsonFinal && jsonFinal.addAttachmentResult && jsonFinal.addAttachmentResult.success) {
+          alert("¡Registro y adjunto guardados con éxito!");
+        } else {
+          alert("¡Registro guardado con éxito! (sin adjunto)");
+        }
+
+        form.reset();
+        graphicsLayer.remove(puntoCreado);
+        puntoCreado = null;
+        submitButton.disabled = true;
+        submitButton.textContent = "Registrar Plantación";
+      })
+      .catch((error) => {
+        alert("Hubo un error en el proceso. Revisa la consola para más detalles.");
+        console.error("Error en el proceso de guardado:", error);
+        submitButton.disabled = false;
+        submitButton.textContent = "Registrar Plantación";
+      });
   });
 });
